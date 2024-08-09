@@ -35,6 +35,7 @@ export interface Message extends Models.Document {
 export interface Thought extends Models.Document {
   thought: string;
   message: Message;
+  chat: Chat;
 }
 
 export interface Chat {
@@ -96,6 +97,18 @@ export interface Profile extends Models.Document {
   modules: Module[];
 }
 
+export interface Action {
+  module: string;
+  channel: string;
+  action: 'input' | 'output';
+  payload: {
+    value: string;
+    type: string;
+    chatid: string;
+  };
+  thought: Thought;
+}
+
 export default async ({ req, res, log, error }: Context) => {
   function debug(text: string) {
     if (process.env.DEBUG!.toLowerCase() === 'true') {
@@ -126,7 +139,7 @@ export default async ({ req, res, log, error }: Context) => {
       );
       switch (req.body.message.text) {
         case '/start':
-          log('present the bot at users'); //in future use gemini directly 
+          log('present the bot at users'); //in future use gemini directly
           bot.telegram.sendMessage(
             String(req.body.message.chat.id),
             'Hello everyone! I am an AI under development, with learning and conversational abilities. To start interacting with me, type the magic word. 😉 What is the magic word?'
@@ -138,10 +151,11 @@ export default async ({ req, res, log, error }: Context) => {
             log('User not present');
             const locale = new Locale(client);
             const languages = await locale.listLanguages();
-            let user_language : string = "english";
+            let user_language: string = 'english';
             for (const language of languages.languages) {
-              if (language.code === req.body.message.from.language_code) user_language = language.name;
-            };
+              if (language.code === req.body.message.from.language_code)
+                user_language = language.name;
+            }
             const new_user = {
               es: { fear: 0 },
               ltm: [
@@ -181,12 +195,12 @@ export default async ({ req, res, log, error }: Context) => {
             log(`user created`);
             bot.telegram.sendMessage(
               String(req.body.message.chat.id),
-              "You managed to say the magic word and now we can finally start interacting. 🤖 If you're curious to see what commands I can execute, visit t.me/giul_ia_actions_bot, while if you want to take a look at my thought process, I'm waiting for you at t.me/giul_ia_think_bot. To interact with me, just write in this chat! 😉 Up until now, you've been shown prerendered text, now the magic happens." //in future use gemini directly 
+              "You managed to say the magic word and now we can finally start interacting. 🤖 If you're curious to see what commands I can execute, visit t.me/giul_ia_actions_bot, while if you want to take a look at my thought process, I'm waiting for you at t.me/giul_ia_think_bot. To interact with me, just write in this chat! 😉 Up until now, you've been shown prerendered text, now the magic happens." //in future use gemini directly
             );
           } else {
             bot.telegram.sendMessage(
               String(req.body.message.chat.id),
-              'Welcome Back to Giulia BOT' //in future use gemini directly 
+              'Welcome Back to Giulia BOT' //in future use gemini directly
             );
             log(`user already in database`);
           }
@@ -213,55 +227,44 @@ export default async ({ req, res, log, error }: Context) => {
           }
       }
     } else {
+      const action: Action = JSON.parse(req.body);
+      debug(`action: action`);
       if (req.body.action) {
-        const action = JSON.parse(req.body.action);
-        const client = new Client()
-          .setEndpoint(process.env.APPWRITE_ENDPOINT!)
-          .setProject(process.env.APPWRITE_PROJECT_ID!)
-          .setKey(process.env.APPWRITE_API_KEY!);
-        let datastore = new Databases(client);
-        const messages: Models.DocumentList<Message> =
-          await datastore.listDocuments(
+        const action: Action = JSON.parse(req.body);
+        if (
+          action.module === 'core' &&
+          action.action === 'input' &&
+          action.channel === 'telegram'
+        ) {
+          log('add message in conversation');
+          log('connect to appwrite api');
+          const client = new Client()
+            .setEndpoint(process.env.APPWRITE_ENDPOINT!)
+            .setProject(process.env.APPWRITE_PROJECT_ID!)
+            .setKey(process.env.APPWRITE_API_KEY!);
+          let datastore = new Databases(client);
+          datastore.createDocument(
             process.env.APPWRITE_DATABASE_ID!,
             process.env.APPWRITE_TABLE_MESSAGES_ID!,
-            [Query.equal('$id', req.body.thought.message.$id)]
+            ID.unique(),
+            {
+              message: action.payload.value,
+              bot: true,
+              chat: action.thought.chat.$id,
+            }
           );
-        if (messages.total > 0) {
-          if (
-            action.module === 'core' &&
-            action.action === 'talk' &&
-            action.channel === 'telegram'
-          ) {
-            log('add message in conversation');
-            log('connect to appwrite api');
-            datastore.createDocument(
-              process.env.APPWRITE_DATABASE_ID!,
-              process.env.APPWRITE_TABLE_MESSAGES_ID!,
-              ID.unique(),
-              {
-                message: action.payload.value,
-                bot: true,
-                chat: messages.documents[0].chat.$id,
-              }
-            );
-            log('connect to Telegram Bot');
-            const bot = new Telegraf(process.env.TELEGRAM_TOKEN!);
-            log(
-              `sent message to telegram channel to ${action.payload.chat_id}`
-            );
-            bot.telegram.sendMessage(
-              String(action.payload.chatid),
-              action.payload.value
-            );
-          } else {
-            console.log(JSON.stringify(req));
-            const bot = new Telegraf(process.env.TELEGRAM_TOKEN_ACTION!);
-            log(`sent action to telegram channel`);
-            bot.telegram.sendMessage(
-              messages.documents[0].chat.chat_id,
-              req.body.action
-            );
-          }
+          log('connect to Telegram Bot');
+          const bot = new Telegraf(process.env.TELEGRAM_TOKEN!);
+          log(`sent message to telegram channel to ${action.payload.chatid}`);
+          bot.telegram.sendMessage(
+            String(action.payload.chatid),
+            action.payload.value
+          );
+        } else {
+          console.log(JSON.stringify(req));
+          const bot = new Telegraf(process.env.TELEGRAM_TOKEN_ACTION!);
+          log(`sent action to telegram channel`);
+          bot.telegram.sendMessage(action.thought.chat.$id, req.body.action);
         }
       } else {
         error('api key not is valid');
