@@ -228,7 +228,7 @@ export default async ({ req, res, log, error }: Context) => {
     } else {
       debug(JSON.stringify(req.body));
       if (req.body.action) {
-        const action: Action = req.body.action;
+        const action: Action = JSON.parse(req.body.action);
         debug(`action: ${JSON.stringify(action)}`);
         if (
           action.module === 'core' &&
@@ -249,7 +249,7 @@ export default async ({ req, res, log, error }: Context) => {
             {
               message: action.payload.value,
               bot: true,
-              chat: req.body.action.thought.chat.$id,
+              chat: req.body.thought.chat.$id,
             }
           );
           log('connect to Telegram Bot');
