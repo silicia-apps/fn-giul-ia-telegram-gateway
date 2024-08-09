@@ -229,7 +229,7 @@ export default async ({ req, res, log, error }: Context) => {
       debug(JSON.stringify(req.body));
       const action: Action = req.body;
       debug(`action: ${JSON.stringify(action) }`);
-      if (req.body.action) {
+      if (action.action) {
         if (
           action.module === 'core' &&
           action.action === 'input' &&
@@ -268,7 +268,7 @@ export default async ({ req, res, log, error }: Context) => {
       } else {
         error('api key not is valid');
       }
-    }
+  }
     if (req.method === 'GET') {
       return res.send('Silicia - Giul-IA BOT - telegram gateway');
     }
