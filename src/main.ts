@@ -249,7 +249,7 @@ export default async ({ req, res, log, error }: Context) => {
             {
               message: action.payload.value,
               bot: true,
-              chat: req.body.thought.chat.$id,
+              chat: req.body.action.thought.chat.$id,
             }
           );
           log('connect to Telegram Bot');
@@ -264,7 +264,7 @@ export default async ({ req, res, log, error }: Context) => {
           const bot = new Telegraf(process.env.TELEGRAM_TOKEN_ACTION!);
           log(`sent action to telegram channel`);
           bot.telegram.sendMessage(
-            req.body.thought.chat.$id,
+            String(action.payload.chatid),
             JSON.stringify(action)
           );
         }
