@@ -110,6 +110,7 @@ export interface Action {
 }
 
 export default async ({ req, res, log, error }: Context) => {
+//const req:any = '';
   function debug(text: string) {
     if (process.env.DEBUG!.toLowerCase() === 'true') {
       error(`debug: ${text}`);
@@ -232,7 +233,7 @@ export default async ({ req, res, log, error }: Context) => {
         debug(`action: ${JSON.stringify(action)}`);
         if (
           action.module === 'core' &&
-          action.action === 'input' &&
+          action.action === 'output' &&
           action.channel === 'telegram'
         ) {
           log('add message in conversation');
