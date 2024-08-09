@@ -10,8 +10,6 @@ function error(text: string) {
   console.error(text);
 }
 
-
-
 type Context = {
   req: any;
   res: any;
@@ -101,7 +99,7 @@ export interface Profile extends Models.Document {
 export default async ({ req, res, log, error }: Context) => {
   function debug(text: string) {
     if (process.env.DEBUG!.toLowerCase() === 'true') {
-      error(text);
+      error(`debug: ${text}`);
     }
   }
   debug(`request: ${JSON.stringify(req)}`);
@@ -273,7 +271,7 @@ export default async ({ req, res, log, error }: Context) => {
       return res.send('Silicia - Giul-IA BOT - telegram gateway');
     }
   } catch (e: any) {
-    error(e);
+    error(`error: ${e}`);
   }
   return res.empty();
 };
