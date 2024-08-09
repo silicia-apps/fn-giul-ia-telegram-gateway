@@ -227,9 +227,9 @@ export default async ({ req, res, log, error }: Context) => {
       }
     } else {
       debug(JSON.stringify(req.body));
-      const action: Action = req.body;
-      debug(`action: ${JSON.stringify(action)}`);
-      if (action.action === 'input' || action.action === 'output') {
+      if (req.body.action) {
+        const action: Action = req.body.action;
+        debug(`action: ${JSON.stringify(action)}`);
         if (
           action.module === 'core' &&
           action.action === 'input' &&
