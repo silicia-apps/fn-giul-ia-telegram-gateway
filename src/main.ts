@@ -40,7 +40,7 @@ export interface Thought extends Models.Document {
 
 export interface Chat {
   $id: string;
-  chat_id: string;
+  chatid: string;
   channel: 'telegram' | 'alexa';
   messages: Message[];
 }
@@ -259,14 +259,6 @@ export default async ({ req, res, log, error }: Context) => {
           bot.telegram.sendMessage(
             String(action.payload.chatid),
             action.payload.value
-          );
-        } else {
-          console.log(JSON.stringify(req));
-          const bot = new Telegraf(process.env.TELEGRAM_TOKEN_ACTION!);
-          log(`sent action to telegram channel`);
-          bot.telegram.sendMessage(
-            String(action.payload.chatid),
-            JSON.stringify(action)
           );
         }
       } else {
