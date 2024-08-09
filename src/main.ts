@@ -10,11 +10,7 @@ function error(text: string) {
   console.error(text);
 }
 
-function debug(text: string) {
-  if (process.env.DEBUG!.toLowerCase() === 'true') {
-    error(text);
-  }
-}
+
 
 type Context = {
   req: any;
@@ -103,6 +99,11 @@ export interface Profile extends Models.Document {
 }
 
 export default async ({ req, res, log, error }: Context) => {
+  function debug(text: string) {
+    if (process.env.DEBUG!.toLowerCase() === 'true') {
+      error(text);
+    }
+  }
   debug(`request: ${JSON.stringify(req)}`);
   const telegram_token = req.headers['x-telegram-bot-api-secret-token'];
   try {
