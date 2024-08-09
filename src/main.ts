@@ -115,7 +115,6 @@ export default async ({ req, res, log, error }: Context) => {
       error(`debug: ${text}`);
     }
   }
-  debug(`request: ${JSON.stringify(req)}`);
   const telegram_token = req.headers['x-telegram-bot-api-secret-token'];
   try {
     log(`Test api key`);
@@ -227,6 +226,7 @@ export default async ({ req, res, log, error }: Context) => {
           }
       }
     } else {
+      debug(req.body);
       const action: Action = JSON.parse(req.body);
       debug(`action: ${action}`);
       if (req.body.action) {
