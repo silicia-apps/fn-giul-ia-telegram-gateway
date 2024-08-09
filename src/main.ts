@@ -228,7 +228,7 @@ export default async ({ req, res, log, error }: Context) => {
     } else {
       debug(JSON.stringify(req.body));
       const action: Action = req.body;
-      debug(`action: ${action}`);
+      debug(`action: ${JSON.stringify(action) }`);
       if (req.body.action) {
         if (
           action.module === 'core' &&
