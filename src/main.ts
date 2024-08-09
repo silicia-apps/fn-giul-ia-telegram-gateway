@@ -1,4 +1,4 @@
-import { Client, Databases, Query, ID, Models } from 'node-appwrite';
+import { Client, Databases, Query, ID, Models, Locale } from 'node-appwrite';
 import { Telegraf } from 'telegraf';
 
 //import * as process from './env.js';
@@ -138,6 +138,12 @@ export default async ({ req, res, log, error }: Context) => {
           log('Registrazione Bot');
           if (chat.total === 0) {
             log('User not present');
+            const locale = new Locale(client);
+            const languages = await locale.listLanguages();
+            let user_language : string = "english";
+            for (const language of languages.languages) {
+              if (language.code === req.body.message.from.language_code) user_language = language.name;
+            };
             const new_user = {
               es: { fear: 0 },
               ltm: [
@@ -151,7 +157,7 @@ export default async ({ req, res, log, error }: Context) => {
                 },
                 {
                   key: 'user_language',
-                  value: [req.body.message.from.language_code],
+                  value: user_language,
                 },
                 {
                   key: 'username_user',
