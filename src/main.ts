@@ -228,7 +228,7 @@ export default async ({ req, res, log, error }: Context) => {
       }
     } else {
       const action: Action = JSON.parse(req.body);
-      debug(`action: action`);
+      debug(`action: ${action}`);
       if (req.body.action) {
         const action: Action = JSON.parse(req.body);
         if (
