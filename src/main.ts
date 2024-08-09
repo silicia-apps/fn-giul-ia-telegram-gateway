@@ -157,7 +157,7 @@ export default async ({ req, res, log, error }: Context) => {
                 },
                 {
                   key: 'user_language',
-                  value: user_language,
+                  value: [user_language],
                 },
                 {
                   key: 'username_user',
