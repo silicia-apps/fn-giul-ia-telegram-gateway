@@ -159,9 +159,13 @@ export default async ({ req, res, log, error }: Context) => {
             const modules = await datastore.listDocuments(process.env.APPWRITE_DATABASE_ID!,
               process.env.APPWRITE_TABLE_MODULES_ID!, [Query.select(['$id'])]);
             log(`modules installed: ${JSON.stringify(modules.documents)}`);
+            let modulesID: string[] = [];
+            for(let module of modules.documents) {
+              modulesID.push(module.$id);
+            }
             const new_user = {
               es: { fear: 0 },
-              modules: modules.documents,
+              modules: modulesID,
               ltm: [
                 {
                   key: 'first_name_user',
