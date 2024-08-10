@@ -156,8 +156,12 @@ export default async ({ req, res, log, error }: Context) => {
               if (language.code === req.body.message.from.language_code)
                 user_language = language.name;
             }
+            const modules = await datastore.listDocuments(process.env.APPWRITE_DATABASE_ID!,
+              process.env.APPWRITE_TABLE_MODULES_ID!, [Query.select(['$id'])]);
+            log(`modules installed: ${JSON.stringify(modules.documents)}`);
             const new_user = {
               es: { fear: 0 },
+              modules: modules.documents,
               ltm: [
                 {
                   key: 'first_name_user',
