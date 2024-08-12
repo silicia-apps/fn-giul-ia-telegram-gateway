@@ -185,7 +185,7 @@ export default async ({ req, res, log, error }: Context) => {
                   value: [req.body.message.from.username],
                 },
               ],
-              name: req.body.message.from.username,
+              name: req.body.message.from.username?req.body.message.from.username:ID.unique(),
               chats: [
                 {
                   channel: 'telegram',
